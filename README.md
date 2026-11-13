@@ -55,6 +55,10 @@ Elke push naar `main` wordt automatisch live gezet:
 Handmatig opnieuw deployen: GitHub → **Actions** → *Deploy hal-TV* → **Run workflow**.
 Logs: `C:\HallTV\logs\server.log`.
 
+Herstarten zonder deploy (bijv. na een wijziging in `.env`): dubbelklik op
+`C:\HallTV\deploy\restart-hall-tv.cmd` op de server (vraagt zelf om administratorrechten).
+Handig als snelkoppeling op het bureaublad.
+
 ## Eenmalige installatie op de server
 
 Node.js staat er al (voor het support dashboard). Alleen een runner voor deze repository is
