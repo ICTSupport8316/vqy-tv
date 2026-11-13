@@ -17,7 +17,7 @@ const crypto = require('crypto');
 // Optionele instellingen uit .env (PORT, DATA_DIR). Zonder .env werkt alles met standaardwaarden.
 try { process.loadEnvFile(path.join(__dirname, '.env')); } catch { /* geen .env */ }
 
-const PORT = Number(process.env.PORT) || 5510;
+const PORT = Number(process.env.PORT) || 8800;
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const CONTENT_FILE = path.join(DATA_DIR, 'content.json');

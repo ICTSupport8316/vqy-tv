@@ -20,7 +20,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "$t = Get-ScheduledTask -
 if errorlevel 1 goto end
 
 echo Wachten tot de hal-TV weer reageert (max. 40 seconden)...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$port = 5510; if (Test-Path 'C:\HallTV\.env') { $l = Select-String -Path 'C:\HallTV\.env' -Pattern '^\s*PORT\s*=\s*(\d+)' | Select-Object -First 1; if ($l) { $port = [int]$l.Matches[0].Groups[1].Value } }; for ($i = 0; $i -lt 40; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest ('http://127.0.0.1:' + $port + '/api/content') -UseBasicParsing -TimeoutSec 3; if ($r.StatusCode -eq 200) { Write-Host ('Klaar: hal-TV draait weer op poort ' + $port) -ForegroundColor Green; exit 0 } } catch { } }; Write-Host 'Hal-TV reageert niet. Laatste regels van de log:' -ForegroundColor Red; Get-Content 'C:\HallTV\logs\server.log' -Tail 20"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$port = 8800; if (Test-Path 'C:\HallTV\.env') { $l = Select-String -Path 'C:\HallTV\.env' -Pattern '^\s*PORT\s*=\s*(\d+)' | Select-Object -First 1; if ($l) { $port = [int]$l.Matches[0].Groups[1].Value } }; for ($i = 0; $i -lt 40; $i++) { Start-Sleep -Seconds 1; try { $r = Invoke-WebRequest ('http://127.0.0.1:' + $port + '/api/content') -UseBasicParsing -TimeoutSec 3; if ($r.StatusCode -eq 200) { Write-Host ('Klaar: hal-TV draait weer op poort ' + $port) -ForegroundColor Green; exit 0 } } catch { } }; Write-Host 'Hal-TV reageert niet. Laatste regels van de log:' -ForegroundColor Red; Get-Content 'C:\HallTV\logs\server.log' -Tail 20"
 
 :end
 echo.

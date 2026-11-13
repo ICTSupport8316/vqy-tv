@@ -14,7 +14,7 @@ param(
     # Waar de hal-TV draait. data\ (slides, foto's, wachtwoord) en .env blijven altijd staan.
     [string]$Target = 'C:\HallTV',
     [string]$TaskName = 'VQY Hal-TV',
-    [int]$DefaultPort = 5510
+    [int]$DefaultPort = 8800
 )
 
 $ErrorActionPreference = 'Stop'
@@ -50,10 +50,15 @@ if (-not (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue)) 
 }
 
 # 3. Eerste keer: poort openzetten in de Windows-firewall (alleen domein- en privénetwerk)
-if (-not (Get-NetFirewallRule -DisplayName $TaskName -ErrorAction SilentlyContinue)) {
+#    Bestaat de regel al met een andere poort (poort gewijzigd), dan wordt hij bijgewerkt.
+$rule = Get-NetFirewallRule -DisplayName $TaskName -ErrorAction SilentlyContinue
+if (-not $rule) {
     Step "Firewallregel '$TaskName' aanmaken voor TCP $port"
     New-NetFirewallRule -DisplayName $TaskName -Direction Inbound -Protocol TCP -LocalPort $port `
         -Action Allow -Profile Domain, Private | Out-Null
+} elseif ((($rule | Get-NetFirewallPortFilter).LocalPort) -ne "$port") {
+    Step "Firewallregel '$TaskName' bijwerken naar TCP $port"
+    $rule | Get-NetFirewallPortFilter | Set-NetFirewallPortFilter -LocalPort $port
 }
 
 # 4. Webserver stoppen

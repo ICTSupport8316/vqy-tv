@@ -6,8 +6,8 @@ hoe lang hij in beeld blijft en tussen welke datums hij getoond wordt.
 
 | Adres | Wat |
 |---|---|
-| `http://<server>:5510/` | De TV-weergave (schermvullend openen op de TV) |
-| `http://<server>:5510/admin` | Beheerpagina met wachtwoord |
+| `http://<server>:8800/` | De TV-weergave (schermvullend openen op de TV) |
+| `http://<server>:8800/admin` | Beheerpagina met wachtwoord |
 
 - `server.js`: Node/Express-server (API, uploads, weer via Open-Meteo, geen API-key nodig)
 - `public/`: TV-weergave (`tv.html`, `tv.js`), beheerpagina (`admin.*`) en de gedeelde
@@ -35,7 +35,7 @@ server even weg is. Pijltjestoetsen links/rechts op de TV-pagina: vorige/volgend
 
 ```powershell
 npm install
-npm start          # http://localhost:5510 en http://localhost:5510/admin
+npm start          # http://localhost:8800 en http://localhost:8800/admin
 ```
 
 ## Hoe deployen werkt
@@ -48,7 +48,7 @@ Elke push naar `main` wordt automatisch live gezet:
    blijven staan), installeert dependencies als `package-lock.json` veranderd is en herstart
    de geplande taak **VQY Hal-TV**.
    De eerste keer maakt het script die taak zelf aan (start bij opstarten, draait als SYSTEM,
-   herstart na een crash) en een firewallregel **VQY Hal-TV** voor TCP 5510 (domein/privé).
+   herstart na een crash) en een firewallregel **VQY Hal-TV** voor TCP 8800 (domein/privé).
 3. Het script controleert of de hal-TV weer reageert; zo niet, dan wordt de run rood en staan
    de laatste logregels in de uitvoer.
 
@@ -73,8 +73,8 @@ nodig: een runner hoort bij één repository, dus die van het support dashboard 
        --name hall-tv --runasservice --windowslogonaccount "NT AUTHORITY\SYSTEM"
    ```
 2. GitHub → **Actions** → *Deploy hal-TV* → **Run workflow**. Groen = klaar.
-3. Open `http://<server>:5510/admin` en kies direct het beheerwachtwoord.
-4. Zet op de TV `http://<server>:5510/` schermvullend open (kiosk-modus of de browser van de TV).
+3. Open `http://<server>:8800/admin` en kies direct het beheerwachtwoord.
+4. Zet op de TV `http://<server>:8800/` schermvullend open (kiosk-modus of de browser van de TV).
 
 ## Back-up
 
