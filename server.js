@@ -149,7 +149,7 @@ function cleanSlide(s = {}) {
 function cleanBlock(b = {}) {
     const block = {
         id: typeof b.id === 'string' && /^[a-z0-9-]{4,40}$/i.test(b.id) ? b.id : crypto.randomUUID(),
-        type: oneOf(b.type, ['text', 'image', 'gallery'], 'text'),
+        type: oneOf(b.type, ['text', 'image', 'gallery', 'weather'], 'text'),
         x: Math.round(num(b.x, -1900, 3800, 0)),
         y: Math.round(num(b.y, -1060, 2140, 0)),
         w: Math.round(num(b.w, 20, 3840, 600)),
@@ -164,6 +164,15 @@ function cleanBlock(b = {}) {
         block.boxColor = color(b.boxColor, '#ffffff');
         block.boxOpacity = num(b.boxOpacity, 0, 100, 0);
         block.padding = num(b.padding, 0, 300, 40);
+    } else if (block.type === 'weather') {
+        // Live weer als los blok: één onderdeel per blok, inhoud schaalt mee met het blok
+        block.part = oneOf(b.part, ['now', 'compact', 'details', 'hours', 'days'], 'now');
+        block.showLabel = b.showLabel !== false;
+        block.showPlace = b.showPlace === true;
+        block.style = cleanStyle(b.style);
+        block.boxColor = color(b.boxColor, '#ffffff');
+        block.boxOpacity = num(b.boxOpacity, 0, 100, 0);
+        block.padding = num(b.padding, 0, 300, 20);
     } else if (block.type === 'image') {
         block.image = upload(b.image);
         block.fit = oneOf(b.fit, ['cover', 'contain'], 'cover');

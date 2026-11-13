@@ -131,6 +131,8 @@
                 img.style.backgroundSize = b.fit;
                 node.appendChild(img);
             } else node.appendChild(el('div', 'hs-block-empty', 'Foto'));
+        } else if (b.type === 'weather') {
+            renderWeatherBlock(node, b, ctx);
         } else {
             const imgs = b.images || [];
             node.dataset.interval = b.interval || 5;
@@ -151,9 +153,91 @@
     function renderFree(slide, ctx) {
         const root = el('div', 'hs-slide hs-news hs-layout-free');
         applyStyle(root, slide.style);
-        (slide.blocks || []).forEach(b => root.appendChild(renderBlock(b, ctx)));
+        const bctx = { ...ctx, slideBg: slide.style.bg };
+        (slide.blocks || []).forEach(b => root.appendChild(renderBlock(b, bctx)));
         addChrome(root, slide, ctx);
         return root;
+    }
+
+    // ------------------------------------------------------------------ weerblok
+    // Onderdelen van het weer als los blok. De inhoud schaalt mee met de grootte van het blok.
+    const WEATHER_PARTS = { now: 'Nu', compact: 'Compact', details: 'Details', hours: 'Komende uren', days: 'Komende dagen' };
+
+    function factsHtml(w) {
+        const c = w.current;
+        return `<div class="hs-w-facts">
+            <div><span>Voelt als</span><b>${deg(c.feels)}</b></div>
+            <div><span>Wind</span><b>${beaufort(c.wind)} Bft ${WIND_DIRS[Math.round(c.windDir / 45) % 8]}</b></div>
+            <div><span>Luchtvochtigheid</span><b>${Math.round(c.humidity)}%</b></div>
+            <div><span>Zon op / onder</span><b>${esc(w.sunrise)} – ${esc(w.sunset)}</b></div>
+        </div>`;
+    }
+    function hoursHtml(w) {
+        return w.hours.map(h => `
+            <div class="hs-w-cell">
+                <div class="hs-w-cell-top">${esc(h.time)}</div>
+                ${icon(h.code, h.isDay)}
+                <div class="hs-w-cell-temp">${deg(h.temp)}</div>
+                <div class="hs-w-cell-pop">${h.pop >= 10 ? `${h.pop}% regen` : '&nbsp;'}</div>
+            </div>`).join('');
+    }
+    function daysHtml(w) {
+        return w.days.slice(1, 6).map(d => {
+            const dt = new Date(d.date + 'T12:00:00');
+            return `<div class="hs-w-day">
+                <div class="hs-w-cell-top">${DAYS[dt.getDay()]} ${dt.getDate()}</div>
+                ${icon(d.code, true)}
+                <div class="hs-w-day-temp"><b>${deg(d.max)}</b><span>${deg(d.min)}</span></div>
+                <div class="hs-w-cell-pop">${d.pop >= 10 ? `${d.pop}% regen` : '&nbsp;'}</div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderWeatherBlock(node, b, ctx) {
+        const st = b.style;
+        applyStyle(node, st);
+        // Wolken in de weericonen krijgen de kleur van wat erachter ligt
+        node.style.setProperty('--bg', b.boxOpacity >= 50 ? b.boxColor : (ctx.slideBg || st.bg));
+        node.classList.add(`hs-wb-align-${st.align}`);
+        node.style.setProperty('--pad', (b.padding || 0) + 'px');
+        if (b.boxOpacity > 0) {
+            const box = el('div', 'hs-box');
+            box.style.background = b.boxColor;
+            box.style.opacity = b.boxOpacity / 100;
+            node.appendChild(box);
+        }
+        const w = ctx.weather;
+        const place = (ctx.settings && ctx.settings.location && ctx.settings.location.name) || '';
+        let html;
+        if (!w || !w.current) {
+            html = '<div class="hs-wb-empty">Weer laden…</div>';
+        } else {
+            const c = w.current;
+            const label = text => (b.showLabel ? `<div class="hs-w-label">${text}</div>` : '');
+            switch (b.part) {
+                case 'compact':
+                    html = `<div class="hs-wb-compact">${icon(c.code, c.isDay)}<div class="hs-wb-ctemp">${deg(c.temp)}</div>
+                        <div><div class="hs-wb-cdesc">${b.showPlace ? esc(place) + ' · ' : ''}${esc(WEATHER_TEXT[c.code] || '')}</div>
+                        <div class="hs-wb-csub">Voelt als ${deg(c.feels)} · ${beaufort(c.wind)} Bft ${WIND_DIRS[Math.round(c.windDir / 45) % 8]}</div></div></div>`;
+                    break;
+                case 'details':
+                    html = label('Details') + factsHtml(w);
+                    break;
+                case 'hours':
+                    html = label('Komende uren') + `<div class="hs-w-row">${hoursHtml(w)}</div>`;
+                    break;
+                case 'days':
+                    html = label('Komende dagen') + `<div class="hs-w-row hs-wb-days">${daysHtml(w)}</div>`;
+                    break;
+                default:
+                    html = `${b.showPlace ? `<div class="hs-wb-place">${esc(place)}</div>` : ''}
+                        <div class="hs-w-now-main">${icon(c.code, c.isDay)}<div class="hs-w-temp">${deg(c.temp)}</div></div>
+                        <div class="hs-w-desc">${esc(WEATHER_TEXT[c.code] || '')}</div>`;
+            }
+        }
+        const area = el('div', 'hs-wb-area');
+        area.appendChild(el('div', `hs-wb-inner hs-wb-${b.part}`, html));
+        node.appendChild(area);
     }
 
     // Fotoreeksen laten wisselen. Stopt vanzelf als de slide uit beeld is.
@@ -331,8 +415,14 @@
             }
             min = Math.min(min, k);
         });
+        // Weerblokken: inhoud zo groot mogelijk binnen het blok (offsetWidth negeert transform)
+        root.querySelectorAll('.hs-wb-inner').forEach(inner => {
+            const area = inner.parentElement;
+            const k = Math.min(area.clientWidth / inner.offsetWidth, area.clientHeight / inner.offsetHeight, 4);
+            inner.style.setProperty('--wk', Number.isFinite(k) && k > 0 ? k : 1);
+        });
         return min;
     }
 
-    window.HallRender = { renderSlide, renderBlock, fitText, startGalleries, slideDuration, isActive, fillClock, richText, FONTS, WEATHER_TEXT };
+    window.HallRender = { renderSlide, renderBlock, WEATHER_PARTS, fitText, startGalleries, slideDuration, isActive, fillClock, richText, FONTS, WEATHER_TEXT };
 })();

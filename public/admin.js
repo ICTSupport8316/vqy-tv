@@ -443,7 +443,8 @@
                 toggle(s, 'enabled', 'Tonen op de TV', { list: true }),
                 h('div', { class: 'hint', html:
                     `Live weer voor <b>${escapeHtml(content.settings.location.name)}</b>, elke 10 minuten bijgewerkt. ` +
-                    'De opmaak van deze slide ligt vast. Sleep hem in de lijst om zijn plek in de volgorde te kiezen.' })
+                    'De opmaak van deze slide ligt vast. Sleep hem in de lijst om zijn plek in de volgorde te kiezen.<br><br>' +
+                    'Zelf opmaken? Maak met <b>+ Weerslide</b> een weerslide van blokken die je helemaal kunt aanpassen, of zet met <b>+ Weer</b> een weerblok op een slide met vrije indeling (bijv. klein in een hoek).' })
             ));
             return;
         }
@@ -521,11 +522,12 @@
 
     // ================================================================ vrije indeling
     const W = 1920, H = 1080;
-    const BLOCK_NAMES = { text: 'Tekst', image: 'Foto', gallery: 'Fotoreeks' };
+    const BLOCK_NAMES = { text: 'Tekst', image: 'Foto', gallery: 'Fotoreeks', weather: 'Weer' };
 
     function blockLabel(b) {
         if (b.type === 'text') return b.title || b.kicker || (b.text || '').split('\n')[0] || 'Tekst';
         if (b.type === 'gallery') return `Fotoreeks (${(b.images || []).length} foto's)`;
+        if (b.type === 'weather') return 'Weer: ' + (R.WEATHER_PARTS[b.part] || '');
         return b.image ? 'Foto' : 'Foto (leeg)';
     }
 
@@ -567,6 +569,9 @@
             b = textBlock({ kicker: '', title: 'Nieuwe tekst', text: '', style: { ...s.style } }, 160 + off, 160 + off, 820, 420, { boxColor: '#ffffff' });
         } else if (type === 'image') {
             b = { id: newId(), type: 'image', x: 1000 - off, y: 140 + off, w: 760, h: 800, radius: 0, image: '', fit: 'cover' };
+        } else if (type === 'weather') {
+            // Wit vlak met ronde hoeken: leesbaar op elke achtergrond, ook op een foto
+            b = weatherBlock('compact', 1100 - off, 120 + off, 680, 200, { style: { ...DEFAULT_STYLE, align: 'left' }, boxOpacity: 92, radius: 18, padding: 28 });
         } else {
             b = { id: newId(), type: 'gallery', x: 1000 - off, y: 140 + off, w: 760, h: 800, radius: 0, images: [], fit: 'cover', interval: 5, dots: true };
         }
@@ -575,8 +580,34 @@
         renderEditor();
         refresh();
         // Bij een foto of fotoreeks meteen de bestandskiezer openen
-        if (type !== 'text') setTimeout(() => { const f = $('#editor .block-sec input[type=file]'); if (f) f.click(); }, 50);
-        else setTimeout(() => { const t = $('#editor .block-sec textarea'); if (t) { t.focus(); t.select(); } }, 50);
+        if (type === 'image' || type === 'gallery') setTimeout(() => { const f = $('#editor .block-sec input[type=file]'); if (f) f.click(); }, 50);
+        else if (type === 'text') setTimeout(() => { const t = $('#editor .block-sec textarea'); if (t) { t.focus(); t.select(); } }, 50);
+    }
+
+    function weatherBlock(part, x, y, w, hgt, extra = {}) {
+        return {
+            id: newId(), type: 'weather', part, x, y, w, h: hgt, radius: 0,
+            showLabel: true, showPlace: false, style: { ...DEFAULT_STYLE },
+            boxColor: '#ffffff', boxOpacity: 0, padding: 20, ...extra
+        };
+    }
+
+    // Complete weerslide opgebouwd uit blokken: zelfde opzet als de vaste weerslide, maar alles aanpasbaar
+    function newWeatherSlide() {
+        const style = { ...DEFAULT_STYLE };
+        const left = { style: { ...style, align: 'left' } };
+        return {
+            id: newId(), type: 'news', enabled: true, duration: content.settings.defaultDuration,
+            kicker: 'Weer', title: content.settings.location.name, text: '', image: '', layout: 'free',
+            showFrom: '', showUntil: '', style,
+            blocks: [
+                { ...textBlock({ kicker: 'Weer', title: content.settings.location.name, text: '', style: { ...style, valign: 'top' } }, 150, 110, 900, 240), padding: 0 },
+                weatherBlock('now', 150, 380, 760, 330, { ...left, padding: 0 }),
+                weatherBlock('details', 150, 760, 760, 220, { ...left, padding: 0, showLabel: false }),
+                weatherBlock('hours', 1020, 380, 750, 300, { ...left, padding: 0 }),
+                weatherBlock('days', 1020, 720, 750, 300, { ...left, padding: 0 })
+            ]
+        };
     }
 
     function moveBlockZ(b, dir) {
@@ -614,6 +645,7 @@
             h('button', { type: 'button', class: 'btn', onclick: () => addBlock('text') }, '+ Tekst'),
             h('button', { type: 'button', class: 'btn', onclick: () => addBlock('image') }, '+ Foto'),
             h('button', { type: 'button', class: 'btn', onclick: () => addBlock('gallery') }, '+ Fotoreeks'),
+            h('button', { type: 'button', class: 'btn', onclick: () => addBlock('weather') }, '+ Weer'),
             h('span', { class: 'muted small bar-hint' }, 'Sleep om te verplaatsen, sleep een hoek voor de grootte (Shift = verhouding houden). Pijltjes = 10 px, Alt = vrij zonder uitlijnen.')
         );
     }
@@ -639,8 +671,10 @@
         if (b) {
             const sec = section(`Blok: ${BLOCK_NAMES[b.type]}`);
             sec.classList.add('block-sec');
+            // append() zou null als tekst "null" tonen: lege onderdelen eerst weglaten
+            const add = (...items) => sec.append(...items.filter(x => x != null && x !== false));
             if (b.type === 'text') {
-                sec.append(
+                add(
                     field('Label boven de titel', textInput(b, 'kicker', { max: 80 })),
                     field('Titel', textInput(b, 'title', { rows: 2, max: 300 })),
                     field('Tekst', textInput(b, 'text', { rows: 5, max: 5000 }), TEXT_HINT),
@@ -652,12 +686,26 @@
                     b.boxOpacity > 0 ? colorField(b, 'boxColor', 'Kleur van het vlak') : null
                 );
             } else if (b.type === 'image') {
-                sec.append(
+                add(
                     field('Foto', imageField(b, 'image')),
                     field('Passen', seg(b, 'fit', [{ value: 'cover', label: 'Vlak vullen (bijsnijden)' }, { value: 'contain', label: 'Hele foto tonen' }]))
                 );
+            } else if (b.type === 'weather') {
+                const part = b.part;
+                add(
+                    field('Onderdeel', seg(b, 'part', Object.entries(R.WEATHER_PARTS).map(([value, label]) => ({ value, label })), { rerender: true }),
+                        'Live weer, elke 10 minuten bijgewerkt. De inhoud wordt zo groot als het blok: sleep een hoek om hem groter of kleiner te maken.'),
+                    part === 'now' || part === 'compact' ? toggle(b, 'showPlace', `Plaatsnaam tonen (${content.settings.location.name})`) : null,
+                    part === 'details' || part === 'hours' || part === 'days' ? toggle(b, 'showLabel', 'Kopje tonen (bijv. "Komende uren")') : null,
+                    field('Uitlijning', seg(b.style, 'align', [{ value: 'left', label: 'Links' }, { value: 'center', label: 'Midden' }, { value: 'right', label: 'Rechts' }])),
+                    h('div', { class: 'row2' },
+                        field('Vlak achter het weer (%)', range(b, 'boxOpacity', 0, 100), '0 = doorzichtig.'),
+                        field('Binnenmarge (px)', range(b, 'padding', 0, 300))
+                    ),
+                    b.boxOpacity > 0 ? colorField(b, 'boxColor', 'Kleur van het vlak') : null
+                );
             } else {
-                sec.append(
+                add(
                     field("Foto's", galleryField(b), 'Ze wisselen elkaar af in deze volgorde. Meerdere tegelijk kiezen of slepen kan.'),
                     h('div', { class: 'row2' },
                         field('Wisselen na (seconden)', range(b, 'interval', 2, 60)),
@@ -666,7 +714,7 @@
                     field('Passen', seg(b, 'fit', [{ value: 'cover', label: 'Vlak vullen (bijsnijden)' }, { value: 'contain', label: 'Hele foto tonen' }]))
                 );
             }
-            sec.append(
+            add(
                 h('div', { class: 'pos-row' },
                     posInput(b, 'x', 'X'), posInput(b, 'y', 'Y'), posInput(b, 'w', 'Breedte'), posInput(b, 'h', 'Hoogte')),
                 field('Ronde hoeken (px)', range(b, 'radius', 0, 200)),
@@ -683,6 +731,15 @@
             if (b.type === 'text') {
                 ed.appendChild(colorsSection(b.style, { title: 'Kleuren van dit blok', noBg: true, box: b }));
                 ed.appendChild(fontSection(b.style));
+            } else if (b.type === 'weather') {
+                ed.appendChild(section('Kleuren en lettertype',
+                    h('div', { class: 'colors' },
+                        colorField(b.style, 'titleColor', 'Temperatuur en waarden'),
+                        colorField(b.style, 'textColor', 'Tekst'),
+                        colorField(b.style, 'accent', 'Accent (kopjes, plaats)')
+                    ),
+                    field('Lettertype', select(b.style, 'font', Object.entries(R.FONTS).map(([value, f]) => ({ value, label: f.label }))))
+                ));
             }
         } else if (blocks.length) {
             ed.appendChild(section('Blok', h('div', { class: 'hint' }, 'Klik op een blok in het voorbeeld of in de lijst hierboven om het aan te passen.')));
@@ -885,6 +942,7 @@
     }
     const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
 
+    $('#addWeatherSlide').onclick = () => { selectedBlockId = null; insertSlide(newWeatherSlide()); };
     $('#addNews').onclick = () => {
         // Neem de opmaak over van de geselecteerde nieuwsslide, zodat een serie er hetzelfde uitziet
         const cur = selected();

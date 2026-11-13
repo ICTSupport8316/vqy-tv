@@ -130,3 +130,29 @@
 
 /* Klok leesbaar houden boven foto's: plaatje in de achtergrondkleur van de slide */
 .hs-clock { background: var(--bg); padding: 12px 20px 14px; border-radius: 10px; margin: -12px -20px 0; }
+
+/* ---------- weerblok (schaalt mee met het blok) ---------- */
+.hs-wb-area { position: absolute; inset: var(--pad, 0); }
+.hs-wb-inner {
+    position: absolute; top: 50%; left: 50%; white-space: nowrap; color: var(--text);
+    transform-origin: center center; transform: translate(-50%, -50%) scale(var(--wk, 1));
+}
+.hs-wb-align-left .hs-wb-inner { left: 0; transform-origin: left center; transform: translate(0, -50%) scale(var(--wk, 1)); }
+.hs-wb-align-right .hs-wb-inner { left: auto; right: 0; transform-origin: right center; transform: translate(0, -50%) scale(var(--wk, 1)); }
+.hs-wb-align-center .hs-wb-inner { text-align: center; }
+.hs-wb-align-right .hs-wb-inner { text-align: right; }
+.hs-wb-inner .hs-w-now-main { display: flex; align-items: center; gap: 24px; }
+.hs-wb-align-center .hs-w-now-main { justify-content: center; }
+.hs-wb-align-right .hs-w-now-main { justify-content: flex-end; }
+.hs-wb-inner .hs-w-now-main .wi { width: 220px; height: 220px; flex: none; }
+.hs-wb-inner .hs-w-facts { width: 760px; margin: 0; text-align: left; }
+.hs-wb-inner .hs-w-row { display: grid; grid-template-columns: repeat(6, 140px); gap: 8px; }
+.hs-wb-inner .hs-wb-days { grid-template-columns: repeat(5, 170px); }
+.hs-wb-inner .hs-w-label { text-align: inherit; }
+.hs-wb-place { font-size: 40px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.hs-wb-compact { display: flex; align-items: center; gap: 22px; text-align: left; }
+.hs-wb-compact .wi { width: 120px; height: 120px; flex: none; }
+.hs-wb-ctemp { font-size: 110px; font-weight: 600; line-height: 1; color: var(--title); letter-spacing: -.03em; }
+.hs-wb-cdesc { font-size: 40px; font-weight: 600; color: var(--title); }
+.hs-wb-csub { font-size: 28px; color: var(--text); margin-top: 6px; }
+.hs-wb-empty { font-size: 40px; opacity: .6; }
