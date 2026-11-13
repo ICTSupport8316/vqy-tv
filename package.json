@@ -1,0 +1,16 @@
+{
+  "name": "vqy-hall-tv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Diavoorstelling voor de TV in de hal: weer en intern nieuws, met beheerpagina",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

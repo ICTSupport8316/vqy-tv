@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <title>VQY Hal-TV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Lora:wght@400;600;700&family=Montserrat:wght@300;400;600;700;800&family=Oswald:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="/static/render.css">
+    <style>
+        html, body { margin: 0; height: 100%; background: #000; overflow: hidden; cursor: none; }
+        /* Vast canvas van 1920x1080, geschaald naar het scherm */
+        #stage {
+            position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+            transform-origin: center center; overflow: hidden; background: #fff;
+        }
+        #stage > .hs-slide { transition: transform 1s cubic-bezier(.65, 0, .35, 1), opacity 1s ease; will-change: transform, opacity; }
+        .t-slide .enter { transform: translateX(100%); }
+        .t-slide .leave { transform: translateX(-100%); }
+        .t-fade .enter, .t-fade .leave { opacity: 0; }
+        #progress {
+            position: absolute; left: 0; bottom: 0; height: 8px; width: 100%; z-index: 5;
+            transform-origin: left center; transform: scaleX(0); opacity: .9;
+        }
+        #empty {
+            position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font: 600 56px 'Montserrat', Arial, sans-serif; color: #111;
+        }
+        #empty small { font-size: 30px; font-weight: 400; color: #666; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div id="stage"></div>
+    <script src="/static/render.js"></script>
+    <script src="/static/tv.js"></script>
+</body>
+</html>

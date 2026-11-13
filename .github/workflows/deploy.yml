@@ -1,0 +1,25 @@
+# Zet elke push naar main automatisch live op de dashboardserver.
+# Draait op de self-hosted runner van deze repository (label "hall-tv"), zie README.md.
+# De eerste run richt ook de geplande taak en de firewallregel in.
+name: Deploy hal-TV
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # handmatig starten via het Actions-tabblad
+
+# Nooit twee deploys tegelijk
+concurrency:
+  group: deploy-hall-tv
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, windows, hall-tv]
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+
+      - name: Live zetten en webserver herstarten
+        shell: powershell
+        run: .\deploy\deploy.ps1 -Source "$env:GITHUB_WORKSPACE"

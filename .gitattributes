@@ -1,0 +1,7 @@
+# Regeleinden vastleggen, zodat elke checkout (ook die van de runner) hetzelfde is
+* text=auto
+
+# Windows-scripts moeten CRLF hebben, anders kan cmd.exe ze verkeerd lezen
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf

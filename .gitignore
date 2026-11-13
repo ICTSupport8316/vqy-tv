@@ -1,0 +1,19 @@
+# Instellingen per machine
+.env
+
+# Inhoud van de TV (slides, foto's, wachtwoord-hash): staat alleen op de server
+data/
+
+# Dependencies (worden op de server opnieuw geïnstalleerd met npm ci)
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Rommel van besturingssystemen en editors
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+*.zip

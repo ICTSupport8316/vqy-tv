@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <title>Hal-TV beheer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Lora:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Oswald:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="/static/render.css">
+    <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+    <!-- Inloggen / eerste keer wachtwoord kiezen -->
+    <div id="auth" hidden>
+        <form id="authForm" class="auth-card">
+            <div class="brand"><span class="brand-mark"></span>Hal-TV</div>
+            <h1 id="authTitle">Inloggen</h1>
+            <p id="authIntro" class="muted"></p>
+            <label class="fld"><span>Wachtwoord</span><input id="authPw" type="password" autocomplete="current-password" required></label>
+            <label class="fld" id="authPw2Wrap" hidden><span>Herhaal wachtwoord</span><input id="authPw2" type="password" autocomplete="new-password"></label>
+            <p id="authError" class="error" hidden></p>
+            <button class="btn primary" type="submit" id="authBtn">Inloggen</button>
+        </form>
+    </div>
+
+    <!-- Beheer -->
+    <div id="app" hidden>
+        <header class="topbar">
+            <div class="brand"><span class="brand-mark"></span>Hal-TV <span class="brand-sub">beheer</span></div>
+            <div class="top-actions">
+                <span id="status" class="status"></span>
+                <a class="btn ghost" href="/" target="_blank" rel="noopener">Bekijk TV ↗</a>
+                <button class="btn ghost" id="settingsBtn">Instellingen</button>
+                <button class="btn ghost" id="logoutBtn">Uitloggen</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="side-head">
+                    <h2>Slides</h2>
+                    <span class="muted small">Sleep om de volgorde te wijzigen</span>
+                </div>
+                <ol id="slideList" class="slide-list"></ol>
+                <div class="add-row">
+                    <button class="btn primary" id="addNews">+ Nieuwsslide</button>
+                </div>
+            </aside>
+
+            <section class="preview-col">
+                <div class="preview-head">
+                    <h2>Voorbeeld</h2>
+                    <span class="muted small">Precies zoals het op de TV komt</span>
+                </div>
+                <div id="blockBar" class="block-bar" hidden></div>
+                <div id="preview" class="preview-frame"></div>
+                <p id="fitNote" class="fit-note" hidden></p>
+                <div class="preview-actions">
+                    <button class="btn" id="dupBtn">Slide dupliceren</button>
+                    <button class="btn danger" id="delBtn">Slide verwijderen</button>
+                </div>
+            </section>
+
+            <section id="editor" class="editor"></section>
+        </div>
+    </div>
+
+    <!-- Instellingen -->
+    <dialog id="settings" class="dialog">
+        <form method="dialog" class="dialog-inner" id="settingsForm">
+            <div class="dialog-head">
+                <h2>Instellingen</h2>
+                <button class="btn ghost" value="close" aria-label="Sluiten">✕</button>
+            </div>
+            <div id="settingsBody"></div>
+        </form>
+    </dialog>
+
+    <script src="/static/render.js"></script>
+    <script src="/static/admin.js"></script>
+</body>
+</html>
