@@ -379,8 +379,6 @@ app.set('trust proxy', false);
 const noCache = { setHeaders: res => res.set('Cache-Control', 'no-cache') };
 app.get('/', (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(PUBLIC_DIR, 'tv.html')));
 app.get('/beheer', (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(PUBLIC_DIR, 'admin.html')));
-// Oud adres blijft werken
-app.get('/admin', (req, res) => res.redirect(301, '/beheer'));
 app.use('/static', express.static(PUBLIC_DIR, noCache));
 // Bestandsnamen zijn uniek, dus deze mogen lang in de cache
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d', immutable: true }));
