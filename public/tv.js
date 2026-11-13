@@ -71,7 +71,7 @@
     }
 
     function showEmpty() {
-        stage.innerHTML = '<div id="empty">Geen slides om te tonen<small>Voeg slides toe of zet ze aan via /admin</small></div>';
+        stage.innerHTML = '<div id="empty">Geen slides om te tonen<small>Voeg slides toe of zet ze aan via /beheer</small></div>';
         current = null;
     }
 

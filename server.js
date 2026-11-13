@@ -3,7 +3,7 @@
     VQY Hal-TV: diavoorstelling voor de TV in de hal (weer + intern nieuws).
 
     /         de TV-weergave (wisselt automatisch tussen de slides)
-    /admin    beheerpagina om slides te maken en op te maken (met wachtwoord)
+    /beheer   beheerpagina om slides te maken en op te maken (met wachtwoord)
 
     Alle inhoud staat in DATA_DIR (standaard ./data): content.json, auth.json en uploads/.
     Die map valt buiten git en wordt bij een deploy niet overschreven.
@@ -72,7 +72,7 @@ function defaultContent() {
             {
                 id: crypto.randomUUID(), type: 'news', enabled: true, duration: 15,
                 kicker: 'Nieuws', title: 'Welkom op de nieuwe hal-TV',
-                text: 'Deze slides zijn helemaal zelf aan te passen via **/admin**:\n- titels, teksten en foto\'s\n- kleuren, lettertype en groottes\n- hoe lang een slide in beeld blijft',
+                text: 'Deze slides zijn helemaal zelf aan te passen via **/beheer**:\n- titels, teksten en foto\'s\n- kleuren, lettertype en groottes\n- hoe lang een slide in beeld blijft',
                 image: '', layout: 'text-only', showFrom: '', showUntil: '',
                 style: { ...DEFAULT_STYLE }
             }
@@ -378,7 +378,9 @@ app.set('trust proxy', false);
 
 const noCache = { setHeaders: res => res.set('Cache-Control', 'no-cache') };
 app.get('/', (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(PUBLIC_DIR, 'tv.html')));
-app.get('/admin', (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(PUBLIC_DIR, 'admin.html')));
+app.get('/beheer', (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(PUBLIC_DIR, 'admin.html')));
+// Oud adres blijft werken
+app.get('/admin', (req, res) => res.redirect(301, '/beheer'));
 app.use('/static', express.static(PUBLIC_DIR, noCache));
 // Bestandsnamen zijn uniek, dus deze mogen lang in de cache
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d', immutable: true }));
@@ -499,7 +501,7 @@ writeJson(CONTENT_FILE, content);
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n[${new Date().toISOString()}] VQY Hal-TV gestart (versie ${VERSION})`);
     console.log(`  TV:      http://localhost:${PORT}/`);
-    console.log(`  Beheer:  http://localhost:${PORT}/admin`);
+    console.log(`  Beheer:  http://localhost:${PORT}/beheer`);
     console.log(`  Naam:    http://hall-tv:${PORT}/  (DNS-alias, zie README)`);
     Object.values(os.networkInterfaces()).flat()
         .filter(i => i && i.family === 'IPv4' && !i.internal)

@@ -123,6 +123,6 @@ if (-not $aliasIps) {
     Step "Netwerknaam '$Alias' wijst naar deze server"
 }
 
-Step "Klaar: hal-TV draait op poort $port (TV: http://${Alias}:$port/  beheer: http://${Alias}:$port/admin)"
+Step "Klaar: hal-TV draait op poort $port (TV: http://${Alias}:$port/  beheer: http://${Alias}:$port/beheer)"
 # Robocopy geeft 1 bij gekopieerde bestanden; expliciet "gelukt" teruggeven
 exit 0

@@ -7,7 +7,7 @@ hoe lang hij in beeld blijft en tussen welke datums hij getoond wordt.
 | Adres | Wat |
 |---|---|
 | `http://hall-tv:8800/` | De TV-weergave (schermvullend openen op de TV) |
-| `http://hall-tv:8800/admin` | Beheerpagina met wachtwoord |
+| `http://hall-tv:8800/beheer` | Beheerpagina met wachtwoord |
 
 `hall-tv` is een DNS-alias (CNAME) voor de dashboardserver **VQY-WS-003**, zie
 [Netwerknaam](#netwerknaam-hall-tv). Werkt de naam (nog) niet, gebruik dan
@@ -23,7 +23,7 @@ hoe lang hij in beeld blijft en tussen welke datums hij getoond wordt.
 
 ## Gebruik
 
-1. Open `/admin`. De eerste keer kies je daar het beheerwachtwoord (doe dit direct na de
+1. Open `/beheer`. De eerste keer kies je daar het beheerwachtwoord (doe dit direct na de
    eerste deploy; tot dan kan iedereen op het netwerk het instellen).
 2. **Instellingen**: plaats voor het weer, logo (PNG met transparante achtergrond),
    overgang (schuiven/vervagen), klok aan/uit.
@@ -40,7 +40,7 @@ server even weg is. Pijltjestoetsen links/rechts op de TV-pagina: vorige/volgend
 
 ```powershell
 npm install
-npm start          # http://localhost:8800 en http://localhost:8800/admin
+npm start          # http://localhost:8800 en http://localhost:8800/beheer
 ```
 
 ## Hoe deployen werkt
@@ -79,7 +79,7 @@ nodig: een runner hoort bij één repository, dus die van het support dashboard 
    ```
 2. GitHub → **Actions** → *Deploy hal-TV* → **Run workflow**. Groen = klaar.
 3. Netwerknaam `hall-tv` aanmaken (zie hieronder).
-4. Open `http://hall-tv:8800/admin` en kies direct het beheerwachtwoord.
+4. Open `http://hall-tv:8800/beheer` en kies direct het beheerwachtwoord.
 5. Zet op de TV `http://hall-tv:8800/` schermvullend open (kiosk-modus of de browser van de TV).
 
 ## Netwerknaam hall-tv
