@@ -500,6 +500,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n[${new Date().toISOString()}] VQY Hal-TV gestart (versie ${VERSION})`);
     console.log(`  TV:      http://localhost:${PORT}/`);
     console.log(`  Beheer:  http://localhost:${PORT}/admin`);
+    console.log(`  Naam:    http://hall-tv:${PORT}/  (DNS-alias, zie README)`);
     Object.values(os.networkInterfaces()).flat()
         .filter(i => i && i.family === 'IPv4' && !i.internal)
         .forEach(i => console.log(`  Netwerk: http://${i.address}:${PORT}/`));

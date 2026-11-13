@@ -6,8 +6,12 @@ hoe lang hij in beeld blijft en tussen welke datums hij getoond wordt.
 
 | Adres | Wat |
 |---|---|
-| `http://<server>:8800/` | De TV-weergave (schermvullend openen op de TV) |
-| `http://<server>:8800/admin` | Beheerpagina met wachtwoord |
+| `http://hall-tv:8800/` | De TV-weergave (schermvullend openen op de TV) |
+| `http://hall-tv:8800/admin` | Beheerpagina met wachtwoord |
+
+`hall-tv` is een DNS-alias (CNAME) voor de dashboardserver **VQY-WS-003**, zie
+[Netwerknaam](#netwerknaam-hall-tv). Werkt de naam (nog) niet, gebruik dan
+`http://vqy-ws-003:8800/`.
 
 - `server.js`: Node/Express-server (API, uploads, weer via Open-Meteo, geen API-key nodig)
 - `public/`: TV-weergave (`tv.html`, `tv.js`), beheerpagina (`admin.*`) en de gedeelde
@@ -74,8 +78,27 @@ nodig: een runner hoort bij één repository, dus die van het support dashboard 
        --name hall-tv --runasservice --windowslogonaccount "NT AUTHORITY\SYSTEM"
    ```
 2. GitHub → **Actions** → *Deploy hal-TV* → **Run workflow**. Groen = klaar.
-3. Open `http://<server>:8800/admin` en kies direct het beheerwachtwoord.
-4. Zet op de TV `http://<server>:8800/` schermvullend open (kiosk-modus of de browser van de TV).
+3. Netwerknaam `hall-tv` aanmaken (zie hieronder).
+4. Open `http://hall-tv:8800/admin` en kies direct het beheerwachtwoord.
+5. Zet op de TV `http://hall-tv:8800/` schermvullend open (kiosk-modus of de browser van de TV).
+
+## Netwerknaam hall-tv
+
+Eén DNS-record in de interne zone `vanquish-yachts.com` (AD-DNS, servers 10.0.0.4 en 10.0.0.5):
+een **CNAME** `hall-tv` → `vqy-ws-003.vanquish-yachts.com`. Een CNAME volgt de server mee als
+zijn IP-adres verandert. Via DNS-beheer (**DNS Manager** → Forward Lookup Zones →
+`vanquish-yachts.com` → New Alias (CNAME)) of in PowerShell op een domeincontroller:
+
+```powershell
+Add-DnsServerResourceRecordCName -ZoneName 'vanquish-yachts.com' -Name 'hall-tv' `
+    -HostNameAlias 'vqy-ws-003.vanquish-yachts.com'
+```
+
+Apparaten krijgen via DHCP het achtervoegsel `vanquish-yachts.com`, dus `http://hall-tv:8800`
+werkt dan overal op het bedrijfsnetwerk. Op een apparaat zonder dat achtervoegsel (bijv. een
+TV op het gastnetwerk of met handmatig ingestelde DNS) werkt alleen het volledige adres
+`http://hall-tv.vanquish-yachts.com:8800`, en dan alleen als het apparaat de interne
+DNS-servers gebruikt. Na elke deploy controleert `deploy.ps1` of `hall-tv` naar deze server wijst.
 
 ## Back-up
 

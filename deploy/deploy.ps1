@@ -14,7 +14,9 @@ param(
     # Waar de hal-TV draait. data\ (slides, foto's, wachtwoord) en .env blijven altijd staan.
     [string]$Target = 'C:\HallTV',
     [string]$TaskName = 'VQY Hal-TV',
-    [int]$DefaultPort = 8800
+    [int]$DefaultPort = 8800,
+    # Netwerknaam (DNS-alias) waarmee iedereen de hal-TV opent, zie README "Netwerknaam hall-tv"
+    [string]$Alias = 'hall-tv'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -109,6 +111,18 @@ if (-not $ok) {
     throw "Hal-TV reageert niet na 30 seconden."
 }
 
-Step "Klaar: hal-TV draait op poort $port (TV: http://$($env:COMPUTERNAME):$port/  beheer: http://$($env:COMPUTERNAME):$port/admin)"
+# 7. Wijst de netwerknaam naar deze server? Alleen een waarschuwing, de deploy zelf is gelukt.
+$localIps = @(Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | ForEach-Object { $_.IPAddress })
+$aliasIps = @()
+try { $aliasIps = @([System.Net.Dns]::GetHostAddresses($Alias) | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | ForEach-Object { $_.ToString() }) } catch { }
+if (-not $aliasIps) {
+    Write-Warning "De naam '$Alias' bestaat nog niet in DNS. Maak een CNAME '$Alias' naar $($env:COMPUTERNAME) aan (zie README). Tot die tijd: http://$($env:COMPUTERNAME):$port/"
+} elseif (-not ($aliasIps | Where-Object { $localIps -contains $_ })) {
+    Write-Warning "De naam '$Alias' wijst naar $($aliasIps -join ', '), niet naar deze server ($($localIps -join ', ')). Pas het DNS-record aan."
+} else {
+    Step "Netwerknaam '$Alias' wijst naar deze server"
+}
+
+Step "Klaar: hal-TV draait op poort $port (TV: http://${Alias}:$port/  beheer: http://${Alias}:$port/admin)"
 # Robocopy geeft 1 bij gekopieerde bestanden; expliciet "gelukt" teruggeven
 exit 0
