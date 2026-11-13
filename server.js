@@ -185,30 +185,38 @@ function cleanBlock(b = {}) {
     return block;
 }
 
-// De weerslide heeft een vaste opmaak en kan alleen aan of uit. Er is er altijd precies één;
-// alleen de plek in de volgorde en aan/uit worden bewaard.
-function fixedWeather(s, settings) {
+// De oude vaste weerslide (type "weather") wordt omgezet naar een gewone slide met weerblokken:
+// zelfde uiterlijk, maar helemaal aan te passen. Plek in de volgorde, aan/uit en planning blijven.
+// Dezelfde opzet als "+ Weerslide" in de beheerpagina (admin.js, newWeatherSlide).
+function weatherSlideFromFixed(s) {
+    const style = { ...DEFAULT_STYLE };
+    const left = { ...style, align: 'left' };
+    const wb = (part, x, y, w, h, extra = {}) => ({
+        id: crypto.randomUUID(), type: 'weather', part, x, y, w, h, radius: 0,
+        showLabel: true, showPlace: false, style: { ...left }, boxColor: '#ffffff', boxOpacity: 0, padding: 0, ...extra
+    });
     return {
-        id: s && s.id ? s.id : crypto.randomUUID(),
-        type: 'weather', enabled: s ? s.enabled !== false : true,
-        duration: settings.defaultDuration,
-        kicker: 'Weer', title: '', showFrom: '', showUntil: '',
-        style: { ...DEFAULT_STYLE }
+        id: s.id, type: 'news', enabled: s.enabled, duration: s.duration,
+        kicker: 'Weer', title: 'Weer {plaats}', text: '', image: '', layout: 'free',
+        showFrom: s.showFrom, showUntil: s.showUntil, style,
+        blocks: [
+            {
+                id: crypto.randomUUID(), type: 'text', x: 150, y: 110, w: 900, h: 240, radius: 0,
+                kicker: 'Weer', title: '{plaats}', text: '', style: { ...style, valign: 'top' },
+                boxColor: '#ffffff', boxOpacity: 0, padding: 0
+            },
+            wb('now', 150, 380, 760, 330),
+            wb('details', 150, 760, 760, 220, { showLabel: false }),
+            wb('hours', 1020, 380, 750, 300),
+            wb('days', 1020, 720, 750, 300)
+        ]
     };
 }
-function normalizeSlides(slides, settings) {
-    const out = [];
-    let weatherSeen = false;
-    for (const raw of slides) {
+function normalizeSlides(slides) {
+    return slides.map(raw => {
         const s = cleanSlide(raw);
-        if (s.type === 'weather') {
-            if (weatherSeen) continue;
-            weatherSeen = true;
-            out.push(fixedWeather(s, settings));
-        } else out.push(s);
-    }
-    if (!weatherSeen) out.unshift(fixedWeather(null, settings));
-    return out;
+        return s.type === 'weather' ? cleanSlide(weatherSlideFromFixed(s)) : s;
+    });
 }
 
 function cleanSettings(s = {}) {
@@ -445,7 +453,7 @@ app.put('/api/content', requireAuth, (req, res) => {
         settings: cleanSettings(body.settings),
         slides: []
     };
-    content.slides = normalizeSlides(body.slides, content.settings);
+    content.slides = normalizeSlides(body.slides);
     writeJson(CONTENT_FILE, content);
     removeUnusedUploads();
     res.json({ ...content, version: VERSION });
@@ -483,9 +491,10 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Er ging iets mis op de server' });
 });
 
-// Weerslide altijd in de vaste vorm, ook bij een oudere of met de hand aangepaste content.json
+// Oude vaste weerslide omzetten naar blokken (en de rest controleren), ook bij een met de hand aangepaste content.json
 content.settings = cleanSettings(content.settings);
-content.slides = normalizeSlides(content.slides, content.settings);
+content.slides = normalizeSlides(content.slides);
+writeJson(CONTENT_FILE, content);
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n[${new Date().toISOString()}] VQY Hal-TV gestart (versie ${VERSION})`);

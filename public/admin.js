@@ -157,7 +157,7 @@
 
     function slideName(s) {
         if (s.type === 'weather') return `Weer ${content.settings.location.name}`;
-        return s.title || s.kicker || 'Zonder titel';
+        return R.fillPlace(s.title || s.kicker, ctx()) || 'Zonder titel';
     }
     function slideState(s) {
         if (!s.enabled) return { text: 'Uit', off: true };
@@ -428,7 +428,7 @@
         );
     }
 
-    const TEXT_HINT = '<b>**vet**</b>, <i>*schuin*</i>, een regel die begint met <b>- </b> wordt een opsomming, een lege regel begint een nieuwe alinea.';
+    const TEXT_HINT = '<b>**vet**</b>, <i>*schuin*</i>, een regel die begint met <b>- </b> wordt een opsomming, een lege regel begint een nieuwe alinea. <b>{plaats}</b> wordt de plaatsnaam van het weer.';
 
     function renderEditor() {
         const ed = $('#editor');
@@ -525,7 +525,7 @@
     const BLOCK_NAMES = { text: 'Tekst', image: 'Foto', gallery: 'Fotoreeks', weather: 'Weer' };
 
     function blockLabel(b) {
-        if (b.type === 'text') return b.title || b.kicker || (b.text || '').split('\n')[0] || 'Tekst';
+        if (b.type === 'text') return R.fillPlace(b.title || b.kicker || (b.text || '').split('\n')[0], ctx()) || 'Tekst';
         if (b.type === 'gallery') return `Fotoreeks (${(b.images || []).length} foto's)`;
         if (b.type === 'weather') return 'Weer: ' + (R.WEATHER_PARTS[b.part] || '');
         return b.image ? 'Foto' : 'Foto (leeg)';
@@ -598,10 +598,10 @@
         const left = { style: { ...style, align: 'left' } };
         return {
             id: newId(), type: 'news', enabled: true, duration: content.settings.defaultDuration,
-            kicker: 'Weer', title: content.settings.location.name, text: '', image: '', layout: 'free',
+            kicker: 'Weer', title: 'Weer {plaats}', text: '', image: '', layout: 'free',
             showFrom: '', showUntil: '', style,
             blocks: [
-                { ...textBlock({ kicker: 'Weer', title: content.settings.location.name, text: '', style: { ...style, valign: 'top' } }, 150, 110, 900, 240), padding: 0 },
+                { ...textBlock({ kicker: 'Weer', title: '{plaats}', text: '', style: { ...style, valign: 'top' } }, 150, 110, 900, 240), padding: 0 },
                 weatherBlock('now', 150, 380, 760, 330, { ...left, padding: 0 }),
                 weatherBlock('details', 150, 760, 760, 220, { ...left, padding: 0, showLabel: false }),
                 weatherBlock('hours', 1020, 380, 750, 300, { ...left, padding: 0 }),

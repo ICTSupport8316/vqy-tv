@@ -97,11 +97,20 @@
     }
 
     // ------------------------------------------------------------------ nieuws
-    function textContent(src) {
+    // {plaats} in een tekst wordt de plaatsnaam van het weer (Instellingen)
+    function placeName(ctx) {
+        return (ctx && ctx.settings && ctx.settings.location && ctx.settings.location.name) || '';
+    }
+    function fillPlace(s, ctx) {
+        return String(s || '').replace(/\{plaats\}/gi, placeName(ctx));
+    }
+
+    function textContent(src, ctx) {
         const text = el('div', 'hs-text');
-        if (src.kicker) text.appendChild(el('div', 'hs-kicker', esc(src.kicker)));
-        if (src.title) text.appendChild(el('h1', 'hs-title', esc(src.title)));
-        if (src.text) text.appendChild(el('div', 'hs-body', richText(src.text)));
+        const kicker = fillPlace(src.kicker, ctx), title = fillPlace(src.title, ctx), body = fillPlace(src.text, ctx);
+        if (kicker) text.appendChild(el('div', 'hs-kicker', esc(kicker)));
+        if (title) text.appendChild(el('h1', 'hs-title', esc(title)));
+        if (body) text.appendChild(el('div', 'hs-body', richText(body)));
         return text;
     }
 
@@ -123,7 +132,7 @@
                 box.style.opacity = b.boxOpacity / 100;
                 node.appendChild(box);
             }
-            node.appendChild(textContent(b));
+            node.appendChild(textContent(b, ctx));
         } else if (b.type === 'image') {
             if (b.image) {
                 const img = el('div', 'hs-gimg on');
@@ -283,7 +292,7 @@
             root.appendChild(img);
             if (layout === 'image-full') root.appendChild(el('div', 'hs-overlay'));
         }
-        if (layout !== 'image-only') root.appendChild(textContent(slide));
+        if (layout !== 'image-only') root.appendChild(textContent(slide, ctx));
         addChrome(root, slide, ctx);
         return root;
     }
@@ -424,5 +433,5 @@
         return min;
     }
 
-    window.HallRender = { renderSlide, renderBlock, WEATHER_PARTS, fitText, startGalleries, slideDuration, isActive, fillClock, richText, FONTS, WEATHER_TEXT };
+    window.HallRender = { renderSlide, renderBlock, fillPlace, WEATHER_PARTS, fitText, startGalleries, slideDuration, isActive, fillClock, richText, FONTS, WEATHER_TEXT };
 })();

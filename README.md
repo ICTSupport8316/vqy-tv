@@ -25,7 +25,8 @@ hoe lang hij in beeld blijft en tussen welke datums hij getoond wordt.
    overgang (schuiven/vervagen), klok aan/uit.
 3. Slides toevoegen, slepen om de volgorde te wijzigen, oogje om aan/uit te zetten.
    Alles wordt automatisch opgeslagen; de TV neemt het binnen ±20 seconden over.
-4. Tekstopmaak: `**vet**`, `*schuin*`, regels die beginnen met `- ` worden een opsomming.
+4. Tekstopmaak: `**vet**`, `*schuin*`, regels die beginnen met `- ` worden een opsomming,
+   `{plaats}` wordt de plaatsnaam van het weer (Instellingen).
    Past de tekst niet, dan wordt hij automatisch kleiner gemaakt (de beheerpagina waarschuwt).
 
 De TV herlaadt zichzelf na een nieuwe deploy en blijft de laatste slides tonen als de
